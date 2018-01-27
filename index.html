@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<form id="checkUrlForm" onsubmit="loadDoc()">
+  Enter URL:<br>
+  <input id="url" type="url" name="firstname" value="http://google.com" placeholder="example.com">
+ 
+  <br><br>
+  <input type="submit" value="Submit">
+</form> 
+
+<p>If you click the "Submit" button, the form-data will be sent.</p>
+<p id="resp"></p>
+
+</body>
+<script>
+
+var i = 0, respElem = document.getElementById('resp');
+
+window.document.getElementById("checkUrlForm").addEventListener("submit", function(event){
+    event.preventDefault();
+});
+
+
+function loadDoc() {
+
+    var urlValue = document.getElementById('url').value;
+    var xhttp = new XMLHttpRequest();
+    respElem.innerHTML = '';
+
+    if( !urlValue || urlValue === null || urlValue == '') {
+  	    window.alert('Please enter url !'); return false;
+    }
+
+    xhttp.open("GET", "/check_url?url="+urlValue, true);
+    xhttp.send();
+
+
+    xhttp.onreadystatechange = function() {
+        if (this.readyState == 4 && this.status == 200) {
+            var result = JSON.parse(this.responseText);
+
+            if( result.status ) {
+                respElem.append(result.response);return;
+            }
+            respElem.append( 'Tried :' + i + ': failed ! \n' );
+            retry( xhttp, urlValue);
+        }
+    };
+  
+}
+
+function retry (xhttp, urlValue) { 
+    i++; 
+    xhttp.open("GET", "/check_url?url="+urlValue, true);
+    return ( i<3 ) ? xhttp.send() : false;
+}
+</script>
+</html>
